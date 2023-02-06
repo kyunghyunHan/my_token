@@ -1,0 +1,20 @@
+[package]
+name = 'my_token'
+version = '1.0.0'
+
+[dependencies.AptosFramework]
+git = 'https://github.com/aptos-labs/aptos-core.git'
+rev = 'main'
+subdir = 'aptos-move/framework/aptos-framework'
+
+[dependencies.AptosToken]
+git = 'https://github.com/aptos-labs/aptos-core.git'
+rev = 'main'
+subdir="aptos-move/framework/aptos-token/"
+
+
+
+[addresses]
+my_token= "0xa604279e6129beb5fa225673daa13f0fa87095e9a576687d1924120a7777b2be"
+
+
