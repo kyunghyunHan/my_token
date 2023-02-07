@@ -3,7 +3,7 @@ module my_token::minting{
        use std::signer;
        use std::string;
        use std::vector;
-       use std::apts_coin::AptosCoin;
+       use std::aptos_coin::AptosCoin;
        use aptos_token::token;
     use aptos_framework::account;
     use aptos_framework::coin;
@@ -63,6 +63,132 @@ struct TokenMintingEvent has drop, store {
      });
     }
 
-    public entry fun issue_collection(creator:&signer)acquires MyToken{}
+    public entry fun issue_collection(creator:&signer)acquires MyToken{
+       assert_is_admin(signer::address_of(creator));
+
+       let minter_resource= borrow_global_mut<MyToken>(@my_token);
+       let resource_signer= account::create_signer_with_capability(&minter_resource.signer_cap);
+
+
+       token::create_collection(
+         &resource_signer,
+         string::utf8(COLLECTION_NAME),
+         string::utf8(DESCRIPTION),
+         string::utf8(COLLECTION_URI),
+         COLLECTION_SUPPLY,
+         vector<bool>[false,false,false],
+
+
+
+       );
+   
+
+
+    }
+
+    public entry fun enable_minting(admin:&signer,status: bool)acquires MyToken{
+      let addr= signer::address_of(admin);
+       assert_is_admin(addr);
+     borrow_global_mut<MyToken>(@my_token).minting_enabled = status;
+    }
+
+
+    public entry fun set_admin(admin:&signer,admin_addr:address)acquires MyToken{
+      let addr= signer::address_of(admin);
+      assert_is_admin(addr);
+      borrow_global_mut<MyToken>(@my_token).admin_addr= admin_addr;
+    }
+
+    public entry fun mint_nft(buyer:&signer,amount:u64)acquires MyToken{
+       let minter_resource= borrow_global_mut<MyToken>(@my_token);
+       assert!(minter_resource.minting_enabled,error::permission_denied(EMINTING_DISABLED));
+
+       //
+       let buyer_addr = signer::address_of(buyer);
+    let required_amount = minter_resource.mint_price * amount;
+        assert!(
+            coin::balance<AptosCoin>(buyer_addr) > required_amount, 
+            error::invalid_argument(ENO_SUFFICIENT_FUND)
+            );
+
+    let resource_signer = account::create_signer_with_capability(&minter_resource.signer_cap);
+      token::initialize_token_store(buyer);
+      token::opt_in_direct_transfer(buyer,true);
+
+      let mutate_config= token::create_token_mutability_config(
+         &vector<bool>[false,false,false,false,true]
+      );
+
+
+
+      let ids= vector::empty<token::TokenDataId>();
+      let final_supply= minter_resource.minted_supply+amount;
+      while (minter_resource.minted_supply <final_supply){
+         minter_resource.minted_supply= minter_resource.minted_supply+1;
+
+
+
+let name = string::utf8(TOKEN_NAME);
+            string::append(&mut name, u64_to_string(minter_resource.minted_supply));
+            
+            let uri = string::utf8(TOKEN_URI);
+            string::append(&mut uri, u64_to_string(minter_resource.minted_supply));
+            string::append_utf8(&mut uri, b".json");
+          let token_data_id = token::create_tokendata(
+                &resource_signer,
+                string::utf8(COLLECTION_NAME),
+                name,
+                string::utf8(DESCRIPTION),
+                TOKEN_SUPPLY,
+                uri,
+                @my_token,
+                100,
+                5,
+                mutate_config,
+                vector::empty<string::String>(),
+                vector::empty<vector<u8>>(),
+                vector::empty<string::String>(),
+            );
+          token::mint_token_to(&resource_signer, signer::address_of(buyer), token_data_id, TOKEN_SUPPLY);
+          vector::push_back(&mut ids,token_data_id);
+      };
+
+
+    coin::transfer<AptosCoin>(buyer,@my_token,required_amount);
+
+    event::emit_event<TokenMintingEvent>(
+      &mut minter_resource.token_minting_events,
+      TokenMintingEvent{
+         buyer_addr,
+         token_data_id:ids,
+      }
+    );
+         
+    }
+
+    fun u64_to_string(value:u64):string::String{
+      if (value==0){
+         return string::utf8(b"0")
+      };
+
+      let buffer= vector::empty<u8>();
+      while (value!=0){
+         vector::push_back(&mut buffer,((48+ value %10)as u8));
+         value= value/10;
+      };
+      vector::reverse(&mut buffer);
+      string::utf8(buffer)
+      
+
+    }
+
+  //---------test
+
+
+  #[test_only]
+   use aptos_framework::aptos_account::create_account;
+    use aptos_framework::aptos_coin::initialize_for_test;
+
+    
 
 }
