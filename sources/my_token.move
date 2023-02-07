@@ -27,15 +27,42 @@ module my_token::minting{
 
      
 
-       struct TokenMintingEvent has drop, store {
-        buyer_addr: address,
-        token_data_id: vector<token::TokenDataId>,
+struct TokenMintingEvent has drop, store {
+       buyer_addr: address,
+       token_data_id: vector<token::TokenDataId>,
     }
-       struct MyToken has store{
 
-        name:vector<u8>,
-        token_data:token::TokenDataId
-       }
 
-    
+   
+    struct MyToken has key{
+      signer_cap: account::SignerCapability,
+      admin_addr:address,
+      minting_enabled:bool,
+      minted_supply:u64,
+      mint_price:u64,
+      token_minting_events:event::EventHandle<TokenMintingEvent>
+    }
+
+    fun assert_is_admin(addr:address)acquires MyToken{
+      let admin= borrow_global<MyToken>(@my_token).admin_addr;
+    assert!(addr == admin, error::permission_denied(ENOT_ADMIN));
+    }
+
+    fun init_module(resource_acc:&signer){
+
+
+     let signer_cap= resource_account::retrieve_resource_account_cap(resource_acc, @my_token); 
+
+     move_to(resource_acc,MyToken{
+        signer_cap,
+        admin_addr:@my_token,
+        minting_enabled:true,
+        minted_supply:0,
+        mint_price:20000000,
+        token_minting_events:account::new_event_handle<TokenMintingEvent>(resource_acc), 
+     });
+    }
+
+    public entry fun issue_collection(creator:&signer)acquires MyToken{}
+
 }
