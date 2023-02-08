@@ -174,23 +174,23 @@ module my_token::my_nft {
 
     // ------------------------------------ tests ------------------------------------
 
-    #[test_only]
-    use aptos_framework::aptos_account::create_account;
-    use aptos_framework::aptos_coin::initialize_for_test;
+    // #[test_only]
+    // use aptos_framework::aptos_account::create_account;
+    // use aptos_framework::aptos_coin::initialize_for_test;
 
-    #[test_only]
-    public fun test_setup(source: &signer, resource_acc: &signer, framework: &signer, buyer: &signer) {
-        create_account(signer::address_of(source));
-        create_account(signer::address_of(buyer));
-        resource_account::create_resource_account(source, vector::empty(), vector::empty());
+    // #[test_only]
+    // public fun test_setup(source: &signer, resource_acc: &signer, framework: &signer, buyer: &signer) {
+    //     create_account(signer::address_of(source));
+    //     create_account(signer::address_of(buyer));
+    //     resource_account::create_resource_account(source, vector::empty(), vector::empty());
         
-        let (burn, mint) = initialize_for_test(framework);
-        let coins = coin::mint<AptosCoin>(1000000000, &mint);
-        coin::deposit(signer::address_of(buyer), coins);
-        coin::destroy_burn_cap(burn);
-        coin::destroy_mint_cap(mint);
-        init_module(resource_acc);
-    }
+    //     let (burn, mint) = initialize_for_test(framework);
+    //     let coins = coin::mint<AptosCoin>(1000000000, &mint);
+    //     coin::deposit(signer::address_of(buyer), coins);
+    //     coin::destroy_burn_cap(burn);
+    //     coin::destroy_mint_cap(mint);
+    //     init_module(resource_acc);
+    // }
 
     // #[test(framework = @0x1, admin = @admin, source = @source, resource_acc = @my_token, buyer = @0x123)]
     // public entry fun normal_process(framework: &signer, admin: &signer, source: &signer, resource_acc: &signer, buyer: &signer) acquires MyToken {

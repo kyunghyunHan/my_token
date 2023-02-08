@@ -15,7 +15,7 @@ subdir="aptos-move/framework/aptos-token/"
 
 
 [addresses]
-my_token= ""
+my_token= "0xa604279e6129beb5fa225673daa13f0fa87095e9a576687d1924120a7777b2be"
 
-source= ""
-admin= ""
+source= "0xb76f4caa1c9d95ac20795c19f854ea45f38a8e0a9147300fd0329436543109ec"
+admin= "0x08bd7e8077b59330d0f867f910323f0fb70447daae7b5bbe9b6ea6c506168912"
